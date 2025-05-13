@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { trash } from 'lucide-react';
+import { Trash } from 'lucide-react';
 
 interface CartItemProps {
   id: string;
