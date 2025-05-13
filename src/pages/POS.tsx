@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import ProductCard from '@/components/pos/ProductCard';
 import CartItem from '@/components/pos/CartItem';
 import { Button } from '@/components/ui/button';
+import PaymentModal from '@/components/pos/PaymentModal';
+import PaymentSuccess from '@/components/pos/PaymentSuccess';
+import { toast } from '@/components/ui/use-toast';
 
 // Sample product data
 const sampleProducts = [
@@ -27,6 +30,10 @@ interface CartItem {
 const POS: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [transactionId, setTransactionId] = useState('');
   
   // Filter products based on search query
   const filteredProducts = sampleProducts.filter(
@@ -90,6 +97,33 @@ const POS: React.FC = () => {
   // Remove item from cart
   const removeFromCart = (id: string) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+  };
+
+  // Handle payment completion
+  const handlePaymentComplete = (method: string) => {
+    setPaymentModalOpen(false);
+    
+    // Generate a random transaction ID
+    const randomId = Math.random().toString(36).substring(2, 10).toUpperCase();
+    setTransactionId(randomId);
+    setPaymentMethod(method);
+    
+    // Show loading state
+    toast({
+      title: "Processing payment...",
+      description: "Please wait while we process your payment.",
+    });
+    
+    // Simulate payment processing
+    setTimeout(() => {
+      setSuccessModalOpen(true);
+    }, 1500);
+  };
+
+  // Handle new sale after successful payment
+  const handleNewSale = () => {
+    setSuccessModalOpen(false);
+    setCartItems([]);
   };
   
   return (
@@ -176,11 +210,29 @@ const POS: React.FC = () => {
           <Button 
             className="w-full bg-primary hover:bg-primary-hover py-3"
             disabled={cartItems.length === 0}
+            onClick={() => setPaymentModalOpen(true)}
           >
             Complete Sale
           </Button>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal 
+        isOpen={isPaymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        onComplete={handlePaymentComplete}
+        amount={cartTotal * 1.07}
+      />
+
+      {/* Success Modal */}
+      <PaymentSuccess
+        isOpen={isSuccessModalOpen}
+        onClose={handleNewSale}
+        paymentMethod={paymentMethod}
+        transactionId={transactionId}
+        amount={cartTotal * 1.07}
+      />
     </div>
   );
 };

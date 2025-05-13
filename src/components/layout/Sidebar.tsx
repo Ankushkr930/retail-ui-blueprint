@@ -2,15 +2,16 @@
 import React, { useState } from 'react';
 import { Home, ShoppingCart, Box, Users, BarChart, ArrowLeft, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Link, useLocation } from 'react-router-dom';
 
 interface MenuItemProps {
   icon: React.ElementType;
   label: string;
+  to: string;
   active?: boolean;
-  onClick?: () => void;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, label, active = false, onClick }) => {
+const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, label, to, active = false }) => {
   return (
     <li 
       className={cn(
@@ -18,28 +19,25 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, label, active = false, 
         "hover:bg-white/10",
         active && "border-l-4 border-primary bg-white/5"
       )}
-      onClick={onClick}
     >
-      <Icon className="mr-3 h-5 w-5" />
-      <span className="text-sm font-medium">{label}</span>
+      <Link to={to} className="flex items-center w-full">
+        <Icon className="mr-3 h-5 w-5" />
+        <span className="text-sm font-medium">{label}</span>
+      </Link>
     </li>
   );
 };
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [activeItem, setActiveItem] = useState('Dashboard');
-
-  const handleItemClick = (label: string) => {
-    setActiveItem(label);
-  };
-
+  const location = useLocation();
+  
   const menuItems = [
-    { icon: Home, label: 'Dashboard' },
-    { icon: ShoppingCart, label: 'POS' },
-    { icon: Box, label: 'Inventory' },
-    { icon: Users, label: 'Customers' },
-    { icon: BarChart, label: 'Reports' },
+    { icon: Home, label: 'Dashboard', to: '/' },
+    { icon: ShoppingCart, label: 'POS', to: '/pos' },
+    { icon: Box, label: 'Inventory', to: '/inventory' },
+    { icon: Users, label: 'Customers', to: '/customers' },
+    { icon: BarChart, label: 'Reports', to: '/reports' },
   ];
 
   return (
@@ -68,8 +66,9 @@ const Sidebar: React.FC = () => {
               key={item.label}
               icon={item.icon}
               label={collapsed ? '' : item.label}
-              active={activeItem === item.label}
-              onClick={() => handleItemClick(item.label)}
+              to={item.to}
+              active={location.pathname === item.to || 
+                    (item.to === '/' && location.pathname === '/index')}
             />
           ))}
         </ul>
