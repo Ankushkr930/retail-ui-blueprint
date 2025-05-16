@@ -5,18 +5,21 @@ import CartItem from '@/components/pos/CartItem';
 import { Button } from '@/components/ui/button';
 import PaymentModal from '@/components/pos/PaymentModal';
 import PaymentSuccess from '@/components/pos/PaymentSuccess';
+import BarcodeScanner from '@/components/pos/BarcodeScanner';
+import QRCodeScanner from '@/components/pos/QRCodeScanner';
 import { toast } from '@/components/ui/use-toast';
+import { Barcode } from 'lucide-react';
 
 // Sample product data
 const sampleProducts = [
-  { id: '1', name: 'T-Shirt', price: 19.99, stock: 25, image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=500&auto=format&fit=crop' },
-  { id: '2', name: 'Jeans', price: 49.99, stock: 10, image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&auto=format&fit=crop' },
-  { id: '3', name: 'Sneakers', price: 79.99, stock: 8, image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&auto=format&fit=crop' },
-  { id: '4', name: 'Hat', price: 14.99, stock: 30, image: 'https://images.unsplash.com/photo-1521369909029-2afed882baee?w=500&auto=format&fit=crop' },
-  { id: '5', name: 'Sunglasses', price: 24.99, stock: 15, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&auto=format&fit=crop' },
-  { id: '6', name: 'Watch', price: 99.99, stock: 5, image: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500&auto=format&fit=crop' },
-  { id: '7', name: 'Backpack', price: 39.99, stock: 12, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&auto=format&fit=crop' },
-  { id: '8', name: 'Jacket', price: 89.99, stock: 7, image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&auto=format&fit=crop' },
+  { id: '1', name: 'T-Shirt', price: 19.99, stock: 25, barcode: '7289382198321', image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=500&auto=format&fit=crop' },
+  { id: '2', name: 'Jeans', price: 49.99, stock: 10, barcode: '9823749827348', image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&auto=format&fit=crop' },
+  { id: '3', name: 'Sneakers', price: 79.99, stock: 8, barcode: '2837492837492', image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&auto=format&fit=crop' },
+  { id: '4', name: 'Hat', price: 14.99, stock: 30, barcode: '1234567890123', image: 'https://images.unsplash.com/photo-1521369909029-2afed882baee?w=500&auto=format&fit=crop' },
+  { id: '5', name: 'Sunglasses', price: 24.99, stock: 15, barcode: '9876543210987', image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&auto=format&fit=crop' },
+  { id: '6', name: 'Watch', price: 99.99, stock: 5, barcode: '5432167890123', image: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500&auto=format&fit=crop' },
+  { id: '7', name: 'Backpack', price: 39.99, stock: 12, barcode: '6789012345678', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&auto=format&fit=crop' },
+  { id: '8', name: 'Jacket', price: 89.99, stock: 7, barcode: '1098765432109', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&auto=format&fit=crop' },
 ];
 
 interface CartItem {
@@ -32,6 +35,8 @@ const POS: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
+  const [isBarcodeScannerOpen, setBarcodeScannerOpen] = useState(false);
+  const [isQRScannerOpen, setQRScannerOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [transactionId, setTransactionId] = useState('');
   
@@ -120,6 +125,51 @@ const POS: React.FC = () => {
     }, 1500);
   };
 
+  // Handle QR code payment
+  const handleQRPayment = () => {
+    setPaymentModalOpen(false);
+    setQRScannerOpen(true);
+  };
+
+  // Handle QR scan completion
+  const handleQRScanComplete = (data: string) => {
+    setQRScannerOpen(false);
+    
+    // Process QR payment data - in a real app, this would be sent to your backend
+    const paymentData = JSON.parse(data);
+    
+    // Set payment method and transaction ID
+    setPaymentMethod('qr');
+    setTransactionId(paymentData.id);
+    
+    // Show success modal
+    setTimeout(() => {
+      setSuccessModalOpen(true);
+    }, 500);
+  };
+
+  // Handle barcode scan
+  const handleBarcodeScan = (barcode: string) => {
+    setBarcodeScannerOpen(false);
+    
+    // Find product matching the barcode
+    const product = sampleProducts.find(p => p.barcode === barcode);
+    
+    if (product) {
+      addToCart(product);
+      toast({
+        title: "Product Added",
+        description: `${product.name} added to cart`,
+      });
+    } else {
+      toast({
+        title: "Product Not Found",
+        description: "No product matches this barcode",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Handle new sale after successful payment
   const handleNewSale = () => {
     setSuccessModalOpen(false);
@@ -130,14 +180,21 @@ const POS: React.FC = () => {
     <div className="flex flex-col lg:flex-row h-full">
       {/* Products Section */}
       <div className="flex-1 p-4 lg:p-6 overflow-auto">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap gap-2">
           <input
             type="text"
             placeholder="Search products..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-1 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
           />
+          <Button 
+            onClick={() => setBarcodeScannerOpen(true)}
+            className="bg-primary flex items-center gap-2"
+          >
+            <Barcode className="h-4 w-4" />
+            Scan Barcode
+          </Button>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -222,6 +279,7 @@ const POS: React.FC = () => {
         isOpen={isPaymentModalOpen}
         onClose={() => setPaymentModalOpen(false)}
         onComplete={handlePaymentComplete}
+        onQRScan={handleQRPayment}
         amount={cartTotal * 1.07}
       />
 
@@ -232,6 +290,20 @@ const POS: React.FC = () => {
         paymentMethod={paymentMethod}
         transactionId={transactionId}
         amount={cartTotal * 1.07}
+      />
+
+      {/* Barcode Scanner */}
+      <BarcodeScanner
+        isOpen={isBarcodeScannerOpen}
+        onClose={() => setBarcodeScannerOpen(false)}
+        onScan={handleBarcodeScan}
+      />
+
+      {/* QR Code Scanner */}
+      <QRCodeScanner
+        isOpen={isQRScannerOpen}
+        onClose={() => setQRScannerOpen(false)}
+        onComplete={handleQRScanComplete}
       />
     </div>
   );

@@ -1,20 +1,40 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [role, setRole] = React.useState<'owner' | 'manager' | 'staff'>('staff');
+  const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState<'owner' | 'manager' | 'staff'>('staff');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Would handle authentication here
-    console.log('Login attempt');
+    // Prepare data for backend
+    const userData = {
+      email,
+      password,
+      role
+    };
+    
+    // This is where you would connect to your backend
+    console.log('Login data ready for backend:', userData);
+    
+    // For now, simulate successful login
+    toast({
+      title: "Login successful",
+      description: `Welcome back, ${role}!`,
+    });
+    
+    // Redirect to dashboard
+    navigate('/');
   };
 
   return (
@@ -42,6 +62,8 @@ const Login = () => {
                   placeholder="name@example.com" 
                   className="pl-10"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
@@ -56,6 +78,8 @@ const Login = () => {
                   placeholder="••••••••" 
                   className="pl-10"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button 
                   type="button"

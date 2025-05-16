@@ -9,12 +9,13 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Banknote, Wallet } from 'lucide-react';
+import { CreditCard, Banknote, Wallet, QrCode } from 'lucide-react';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (method: string) => void;
+  onQRScan: () => void;
   amount: number;
 }
 
@@ -22,6 +23,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   isOpen, 
   onClose, 
   onComplete, 
+  onQRScan,
   amount 
 }) => {
   return (
@@ -73,6 +75,18 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <div>
                 <div className="font-medium">Mobile Wallet</div>
                 <div className="text-xs text-gray-500">Apple Pay, Google Pay, etc.</div>
+              </div>
+            </Button>
+
+            <Button 
+              onClick={onQRScan}
+              className="flex items-center justify-center gap-2 h-16"
+              variant="outline"
+            >
+              <QrCode className="h-6 w-6" />
+              <div>
+                <div className="font-medium">QR Code</div>
+                <div className="text-xs text-gray-500">Scan QR to pay</div>
               </div>
             </Button>
           </div>

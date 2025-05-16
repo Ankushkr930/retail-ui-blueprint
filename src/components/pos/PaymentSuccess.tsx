@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -8,7 +8,8 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Mail, Send } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 interface PaymentSuccessProps {
   isOpen: boolean;
@@ -25,6 +26,25 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({
   transactionId,
   amount
 }) => {
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  const sendReceipt = (type: 'email' | 'sms') => {
+    setIsSending(true);
+    
+    // This would connect to your backend in a real implementation
+    setTimeout(() => {
+      setIsSending(false);
+      toast({
+        title: "Receipt Sent",
+        description: type === 'email' 
+          ? `Receipt sent to ${email}` 
+          : `Receipt sent to ${phone}`,
+      });
+    }, 1500);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -56,8 +76,44 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({
             </div>
           </div>
           
-          <div className="text-green-600 bg-green-50 rounded-md p-2 text-sm">
-            Receipt has been emailed to the customer
+          <div className="space-y-3 mb-4">
+            <div className="text-left font-medium">Send Digital Receipt</div>
+            
+            <div className="flex space-x-2">
+              <input
+                type="email"
+                placeholder="customer@example.com"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button 
+                onClick={() => sendReceipt('email')}
+                disabled={!email || isSending}
+                className="flex items-center gap-1"
+              >
+                <Mail className="h-4 w-4" />
+                {isSending ? 'Sending...' : 'Email'}
+              </Button>
+            </div>
+            
+            <div className="flex space-x-2">
+              <input
+                type="tel"
+                placeholder="+1 123 456 7890"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+              <Button 
+                onClick={() => sendReceipt('sms')}
+                disabled={!phone || isSending}
+                className="flex items-center gap-1"
+              >
+                <Send className="h-4 w-4" />
+                {isSending ? 'Sending...' : 'SMS'}
+              </Button>
+            </div>
           </div>
         </div>
         
